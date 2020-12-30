@@ -1,0 +1,36 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "jest": {
+    "bail": true,
+    "verbose": true
+  },
+  "scripts": {
+    "test": "jest --watchAll",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Mohammad Yaser Ahmadi",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.6",
+    "supertest": "^6.0.1",
+    "jest": "^26.6.3"
+  },
+  "dependencies": {
+    "async-redis": "^1.1.7",
+    "axios": "^0.21.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "faker": "^5.1.0",
+    "joi": "^14.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.8",
+    "mongoose-unique-validator": "^2.0.3",
+    "multer": "^1.4.2",
+    "uuid": "^8.3.1"
+  }
+}
