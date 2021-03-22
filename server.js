@@ -1,15 +1,6 @@
 const app = require("./app");
-// let init = require("./initializer");
-// init.runInitializer()
-//   .then(() => {
-//     app.listen(8080, () => {
-//       console.log("server port is 8080");
-//     });
-//   })
-//   .catch((error) => {
-//     console.log(error);
-//   });
-
-  app.listen(8080, () => {
-    console.log("server port is 8080")
-  })
+const config = require("./config");
+app.listen(config.PORT, () => {
+  console.log(`Server Port: ${config.PORT}`);
+  console.log("Server Is Runnig")
+});

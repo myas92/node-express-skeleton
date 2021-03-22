@@ -2,6 +2,14 @@
 2:   در فایل اصلی کانفیپ مانگو تغییر دادمC:\data\db  مسیر را از حالت دیفالت به مسیر 
 3: پوشه های جدید برای رپلیکیت گرفتن میسازیم
 4: mongod را در مسیر bin اجرا میکنیمک
+-: rs.initilize();
 5: mongod --port 27017 --dbpath C:\data\rs1 --replSet m101 --bind_ip localhost
 6: دوتا فایل cmd باز میشه 
 7: از transaction ها میتوانیم استفاده کنیم
+
+
+//آموزش ارسال ایمیل 
+https://nilootech.com/learning/5e7a395bd7f6943437d3b8a6
+
+تولید ای  دی رندم یونیک
+const { v4: uuid } = require("uuid");

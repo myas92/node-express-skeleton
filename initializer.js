@@ -1,27 +1,32 @@
 const asyncRedis = require("async-redis");
 const mongoose = require("mongoose");
+const config = require("./config");
 class Initializer {
   static async runInitializer() {
-    //await Initializer.redisDb();
-    await Initializer.mongoDb();
+    await Initializer.redisConfig();
+    await Initializer.mongodbConfig();
   }
-  static async redisDb() {
-    Initializer.redisClinet = asyncRedis.createClient({
-      host: "127.0.0.1",
-      db: 13,
+  static async redisConfig() {
+    Initializer.redisClient = asyncRedis.createClient({
+      host: config.REDIS_HOST,
+      db: config.REDIS_DB,
+    });
+    Initializer.redisPubSub = asyncRedis.createClient({
+      host: config.REDIS_HOST_PUB_SUB,
+      db: config.REDIS_DB_PUB_SUB,
     });
   }
-
-  static async mongoDb() {
+  static async mongodbConfig() {
     try {
-      await mongoose.connect("mongodb://localhost/revaal", {
+      await mongoose.connect(`${config.MONGO_DB_URL}/${config.MONGO_DB_NAME}`, {
       // await mongoose.connect("mongodb://yaser1:27017,yaser1:27018,yaser1:27019/revyaser?replicaSet=rs", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
+        useFindAndModify : false,
         retryWrites: false
       });
-      console.log("mongodb is OK");
+      console.log(`Mongodb Is OK : ${config.MONGO_DB_NAME}`);
     } catch (error) {
       console.warn("mongodb Warning", error);
     }
