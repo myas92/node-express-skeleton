@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
     }
     const decodedToken = jwt.verify(token, config.JWT);
     let identifiedToken = await redisController.hget(
-      "tokens",
+      "verify_codes",
       decodedToken.user_id,
       token
     );
@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
       const error = new HttpError(Errors.Authentication_Failed, req.language);
       return next(error);
     }
-    req.userData = { user_id: decodedToken.user_id, rolls: decodedToken.rolls };
+    req.userData = { user_id: decodedToken.user_id, roles: decodedToken.roles };
     next();
   } catch (err) {
     const error = new HttpError(Errors.Authentication_Failed, req.language);

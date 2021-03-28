@@ -48,7 +48,7 @@ class RedisController {
     try {
       id = typeof id !== "string" ? id.toString() : id;
       // let result = await dbConfig.redisClient.get(id);
-      await dbConfig.redisClient.del(`${folder}:${id}`); // بخواهیم بصورت یک فولدر باشد
+      await dbConfig.redisClient.del(`${folder}:${id}`); 
     } catch (error) {
       throw error;
     }

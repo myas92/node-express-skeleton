@@ -5,7 +5,7 @@ const userController = require("../user/controller");
 const dbConfig = require("../../../initializer");
 const stVars = require("../../../const/static-variables");
 const config = require("../../../config");
-const Token = require("./model");
+const { VerifyCode, ForgetVerifyCode } = require("./model");
 const User = require("../user/model");
 const HttpError = require("../../../util/http-error");
 const Errors = require("../../../const/errors");
@@ -28,19 +28,15 @@ class authControllers {
       // از آپسرت استفاده میکنیم تا اخرین وری فای کد فقط معتبر باشد
       let verifiyCode = getVerifyCode();
       let hashedPassword = await bcrypt.hash(password, 12);
-      await Token.findOneAndUpdate(
-        query,
-        {
-          ...query,
-          display_name,
-          password: hashedPassword,
-          verify_code: verifiyCode,
-          ip: req.ip,
-          is_used: false,
-          expire_date: Date.now() + stVars.EXPIRE_TIME_EMAIL_TOKEN,
-        },
-        { new: true, upsert: true }
-      );
+      await VerifyCode.create({
+        ...query,
+        display_name,
+        password: hashedPassword,
+        verify_code: verifiyCode,
+        ip: req.ip,
+        is_used: false,
+        expire_date: Date.now() + stVars.EXPIRE_TIME_TOKEN,
+      });
       //TODO : ارسال ایمیل از حالت کامنت خارج شود
       //ارسال ایمیل
       // if (typeOfUsername == "email") await sendEmail(email, verifiyCode);
@@ -63,10 +59,11 @@ class authControllers {
     try {
       let { username, verify_code } = req.body;
       let query = getQueryOfUsername(username); //{email: a@gmail.com} or {phone:09123456789}
-      let createdToken = await Token.findOne({
-        $and: [query, { verify_code }, { is_used: false }],
-      });
-      if (!createdToken) {
+      let createdToken = await VerifyCode.findOne({
+        $and: [query, { is_used: false }],
+      }).sort({ createdAt: -1 });
+      // ایمیلی برای توکن نبود و توکن نامعتبر بود
+      if (!createdToken || createdToken.verify_code != verify_code) {
         let error = new HttpError(Errors.Invalid_Verify_Code, req.language);
         return next(error);
       }
@@ -80,29 +77,27 @@ class authControllers {
         email: createdToken.email,
         phone: createdToken.phone,
         password: createdToken.password,
-        rolls: ["visitor"],
       });
       const session = await mongoose.startSession();
       session.startTransaction();
       try {
         // ایجاد یوزر جدید
-        await user.save({ session });
+        createdUser = await user.save({ session });
         //توکن استفاده شده است
         createdToken.is_used = true;
         createdToken.password = "-1";
-        createdUser = await createdToken.save({ session });
+        await createdToken.save({ session });
         await session.commitTransaction();
         session.endSession();
         let token = jwt.sign(
-          { username, user_id: createdUser._id, rolls: createdUser.rolls },
+          { username, user_id: createdUser._id, roles: createdUser.roles },
           config.JWT,
           { expiresIn: stVars.EXPIRE_TIME_JWT_TOKEN }
         );
-        await redisController.hset("tokens", createdUser._id, token);
+        await redisController.hset("verify_codes", createdUser._id, token);
         res.status(201).json({
           status: "success",
           user_id: createdUser._id,
-          username,
           token,
         });
       } catch (err) {
@@ -167,7 +162,7 @@ class authControllers {
         token = jwt.sign(
           {
             user_id: existingUser._id,
-            rolls: existingUser.rolls,
+            roles: existingUser.roles,
           },
           config.JWT,
           { expiresIn: stVars.EXPIRE_TIME_JWT_TOKEN }
@@ -178,8 +173,8 @@ class authControllers {
       }
 
       try {
-        await redisController.hset("tokens", existingUser._id, token);
-        //redisController.setExpireTime("tokens", existingUser._id);
+        await redisController.hset("verify_codes", existingUser._id, token);
+        //redisController.setExpireTime("verify_codes", existingUser._id);
       } catch (err) {
         const error = new HttpError(Errors.Loggin_Failed, req.language);
         return next(error);
@@ -200,7 +195,7 @@ class authControllers {
     try {
       let { user_id } = req.userData;
       let token = req.headers.authorization.split(" ")[1];
-      await redisController.hdelete("tokens", user_id, token);
+      await redisController.hdelete("verify_codes", user_id, token);
       res.status(201).json({ status: "success" });
     } catch (err) {
       console.log(err);
@@ -213,7 +208,7 @@ class authControllers {
   logoutAll = async (req, res, next) => {
     try {
       let { user_id } = req.userData;
-      await redisController.delete("tokens", user_id);
+      await redisController.delete("verify_codes", user_id);
       res.status(201).json({ status: "success" });
     } catch (err) {
       console.log(err);
@@ -233,19 +228,13 @@ class authControllers {
       }
       // از آپسرت استفاده میکنیم تا اخرین وری فای کد فقط معتبر باشد
       let verifiyCode = getVerifyCode();
-      await Token.findOneAndUpdate(
-        query,
-        {
-          ...query,
-          display_name,
-          password: "-1",
-          verify_code: verifiyCode,
-          ip: req.ip,
-          is_used: false,
-          expire_date: Date.now() + stVars.EXPIRE_TIME_EMAIL_TOKEN,
-        },
-        { new: true, upsert: true }
-      );
+      await ForgetVerifyCode.create({
+        ...query,
+        verify_code: verifiyCode,
+        ip: req.ip,
+        is_used: false,
+        expire_date: Date.now() + stVars.EXPIRE_TIME_TOKEN,
+      });
       //TODO : ارسال ایمیل از حالت کامنت خارج شود
       //ارسال ایمیل
       // if (typeOfUsername == "email") await sendEmail(email, verifiyCode);
@@ -263,9 +252,138 @@ class authControllers {
       return next(error);
     }
   };
+  forgetPasswordConfirm = async (req, res, next) => {
+    try {
+      let { username, verify_code } = req.body;
+      let query = getQueryOfUsername(username); //{email: a@gmail.com} or {phone:09123456789}
+      let createdToken = await ForgetVerifyCode.findOne({
+        $and: [query, { is_used: false }],
+      }).sort({ createdAt: -1 });
+      // ایمیلی برای توکن نبود و توکن نامعتبر بود
+      if (!createdToken || createdToken.verify_code != verify_code) {
+        let error = new HttpError(Errors.Invalid_Verify_Code, req.language);
+        return next(error);
+      }
+      if (createdToken.expire_date < Date()) {
+        let error = new HttpError(Errors.Expiration_Verify_Code, req.language);
+        return next(error);
+      }
+      let existingUser = await userController.getUserByQuery(query);
+      if (!existingUser) {
+        const error = new HttpError(Errors.Invalid_Username, req.language);
+        return next(error);
+      }
+      //توکن استفاده شده است
+      createdToken.is_used = true;
+      await createdToken.save();
+
+      let reset_token = jwt.sign(
+        { user_id: existingUser._id, roles: existingUser.roles },
+        config.JWT,
+        { expiresIn: stVars.EXPIRE_TIME_JWT_FORGET_PASSWORD_TOKEN }
+      );
+      await redisController.hset(
+        "forget_verify_codes",
+        existingUser._id,
+        reset_token
+      );
+      res.status(201).json({
+        status: "success",
+        user_id: existingUser._id,
+        reset_token,
+      });
+    } catch (err) {
+      console.log(err);
+      const error = new HttpError(Errors.Something_Went_Wrong, req.language);
+      return next(error);
+    }
+  };
+  forgetPasswordReset = async (req, res, next) => {
+    try {
+      let { password, reset_token } = req.body;
+      let decodedToken;
+      try {
+        decodedToken = jwt.verify(reset_token, config.JWT);
+        let identifiedToken = await redisController.hget(
+          "forget_verify_codes",
+          decodedToken.user_id,
+          reset_token
+        );
+        if (!identifiedToken) {
+          const error = new HttpError(
+            Errors.Reset_Forget_Password_Faild,
+            req.language
+          );
+          return next(error);
+        }
+      } catch (err) {
+        const error = new HttpError(Errors.Invalid_Token, req.language);
+        return next(error);
+      }
+
+      let existingUser = await userController.getUserById(decodedToken.user_id);
+      if (!existingUser) {
+        const error = new HttpError(Errors.User_Undefinded, req.language);
+        return next(error);
+      }
+
+      let hashedPassword = await bcrypt.hash(password, 12);
+      existingUser.password = hashedPassword;
+      await existingUser.save();
+      let token = jwt.sign(
+        { user_id: existingUser._id, roles: existingUser.roles },
+        config.JWT,
+        { expiresIn: stVars.EXPIRE_TIME_JWT_TOKEN }
+      );
+      await redisController.delete("verify_codes", existingUser._id);
+      await redisController.delete("forget_verify_codes", existingUser._id);
+      await redisController.hset("verify_codes", existingUser._id, token);
+      res.status(201).json({
+        status: "success",
+        user_id: existingUser._id,
+        token,
+      });
+    } catch (err) {
+      console.log(err);
+      const error = new HttpError(Errors.Something_Went_Wrong, req.language);
+      return next(error);
+    }
+  };
+
   resetPassword = async (req, res, next) => {
-    let { national_code } = req.body;
-    console.log("signUpCode");
+    try {
+      let { password, new_password } = req.body;
+      let { user_id } = req.userData;
+      let isValidPassword = false;
+      let existingUser;
+      try {
+         existingUser = await userController.getUserById(user_id);
+        if (!existingUser) {
+          const error = new HttpError(Errors.User_Undefinded, req.language);
+          return next(error);
+        }
+        isValidPassword = await bcrypt.compare(password, existingUser.password);
+      } catch (err) {
+        const error = new HttpError(Errors.Check_Credentials, req.language);
+        return next(error);
+      }
+      if (!isValidPassword) {
+        const error = new HttpError(Errors.Check_Credentials, req.language);
+        return next(error);
+      }
+      let hashedPassword = await bcrypt.hash(new_password, 12);
+      existingUser.password = hashedPassword;
+      await existingUser.save();
+      await redisController.delete("verify_codes", existingUser._id);
+      res.status(201).json({
+        status: "success",
+        user_id: existingUser._id
+      });
+    } catch (err) {
+      console.log(err);
+      const error = new HttpError(Errors.Something_Went_Wrong, req.language);
+      return next(error);
+    }
   };
 }
 

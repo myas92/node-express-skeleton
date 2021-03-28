@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const authRouters = require("./auth/routes");
 const roleRouters = require("./role/routes");
-const testRouters = require("./test/routes");
+const usersRouters = require("./user/routes");
 
 
 router.use("/auth", authRouters);
-// router.use("/role", roleRouters);
+router.use("/users", usersRouters);
 // router.use("/test", testRouters);
 
 

@@ -132,3 +132,36 @@ exports.Login_Faild = {
     EN: "Login Faild",
   },
 };
+
+exports.User_Undefinded = {
+  statusCode: 200,
+  code: 1013,
+  message: {
+    FA: "کاربر یافت نشد",
+    EN: "User Undefinded",
+  },
+};
+exports.Invalid_Token = {
+  statusCode: 200,
+  code: 1014,
+  message: {
+    FA: "توکن نامعتبر است",
+    EN: "Invalid Token",
+  },
+};
+exports.Reset_Forget_Password_Faild = {
+  statusCode: 200,
+  code: 1015,
+  message: {
+    FA: "فرایند بروز رسانی پسورد امکان پذیر نیست",
+    EN: "Reset Forget Password Faild",
+  },
+};
+exports.Access_Denied = {
+  statusCode: 403,
+  code: 1016,
+  message: {
+    FA: "دسترسی به این مسیر امکان پذیر نمی باشد",
+    EN: "could not access to this api",
+  },
+};

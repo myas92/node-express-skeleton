@@ -9,16 +9,12 @@ class userControllers {
       let result = await User.findOne({ email: email });
       return result;
     } catch (err) {
-      // console.log(err);
-      // const error = new HttpError(
-      //   "Signing Up faild, please try again later",
-      //   500
-      // );
       throw err;
     }
   };
   getUserByQuery = async (query) => {
     try {
+      query["is_deleted"] = false;
       let result = await User.findOne(query);
       return result;
     } catch (err) {
@@ -31,8 +27,7 @@ class userControllers {
         display_name: initialUser.display_name,
         email: initialUser.email,
         phone: initialUser.phone,
-        password: initialUser.password,
-        rolls: ["visitor"],
+        password: initialUser.password
       });
       let createdUser = await user.save();
       return createdUser;
@@ -40,29 +35,33 @@ class userControllers {
       throw err;
     }
   };
-  async authenticatePhone(req, res, next) {
-    let { phone } = req.body;
-    console.log("authenticatePhone");
-    res.status(201).json({ m: email });
+  getUserById = async (id) => {
+    try {
+      let result = await User.findById(id);
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  };
+  async getAllUsers(req, res, next) {
+    console.log("getAllUsers");
+    res.status(201).json({ m: "email" });
   }
-  async authenticateCode(req, res, next) {
-    let { national_code } = req.body;
-    console.log("authenticateCode");
-    res.status(201).json({ m: national_code });
+  async getUser(req, res, next) {
+    console.log("getUser");
+    res.status(201).json({ m: "national_code" });
   }
 
-  async signUpEmail(req, res, next) {
-    let { email, password } = req.params;
-    console.log("signUpEmail");
+  async updateUser(req, res, next) {
+
+    console.log("updateUser");
     res.status(201).json({ m: "t" });
-    // .json({ userId: createdUser.id, email: createdUser.email, token: token });
   }
-  async signUpPhone(req, res, next) {
-    console.log("signUpPhone");
-  }
-  async signUpCode(req, res, next) {
-    let { national_code } = req.body;
-    console.log("signUpCode");
+
+  async deleteUser(req, res, next) {
+
+    console.log("deleteUser");
+    res.status(201).json({ m: "t" });
   }
 }
 

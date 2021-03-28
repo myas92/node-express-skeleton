@@ -25,25 +25,19 @@ const authSchema = {
     password: Joi.string().regex(passwordPattern).required(),
   }),
   forget_password: Joi.object().keys({
-    username: Joi.string().regex(phoneEmailPattern).required()
+    username: Joi.string().regex(phoneEmailPattern).required(),
   }),
-  signup_phone_number: Joi.object().keys({
-    calling_code: Joi.string().min(2).max(4),
-    phone_number: Joi.string().length(10).regex(phonePattern).required(),
-    password: Joi.string().regex(passwordPattern).required(),
+  forget_password_confirm: Joi.object().keys({
+    username: Joi.string().regex(phoneEmailPattern).required(),
+    verify_code: Joi.string().required().min(5).max(5),
   }),
-  signup_national_code: Joi.object().keys({
-    national_code: Joi.string().required().min(2).max(10),
+  forget_password_reset: Joi.object().keys({
     password: Joi.string().regex(passwordPattern).required(),
+    reset_token: Joi.string().required(),
   }),
-  login_phone_number: Joi.object().keys({
-    calling_code: Joi.string().min(2).max(4).required(),
-    phone_number: Joi.string().length(10).regex(phonePattern).required(),
+  reset_password: Joi.object().keys({
     password: Joi.string().regex(passwordPattern).required(),
-  }),
-  login_national_code: Joi.object().keys({
-    national_code: Joi.string().min(2).max(4),
-    password: Joi.string().regex(passwordPattern).required(),
+    new_password: Joi.string().regex(passwordPattern).required(),
   }),
 };
 
