@@ -45,8 +45,12 @@ class authControllers {
       //TODO : کد اعتبار سنجی از نتیجه حذف شود
       res.status(201).json({
         status: "success",
-        username,
-        verify_code: verifiyCode,
+        result: [
+          {
+            username,
+            verify_code: verifiyCode,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);
@@ -97,8 +101,12 @@ class authControllers {
         await redisController.hset("verify_codes", createdUser._id, token);
         res.status(201).json({
           status: "success",
-          user_id: createdUser._id,
-          token,
+          result: [
+            {
+              user_id: createdUser._id,
+              token,
+            },
+          ],
         });
       } catch (err) {
         await session.abortTransaction();
@@ -181,8 +189,12 @@ class authControllers {
       }
       res.json({
         status: "success",
-        userId: existingUser.id,
-        token: token,
+        result: [
+          {
+            userId: existingUser.id,
+            token: token,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);
@@ -196,7 +208,7 @@ class authControllers {
       let { user_id } = req.userData;
       let token = req.headers.authorization.split(" ")[1];
       await redisController.hdelete("verify_codes", user_id, token);
-      res.status(201).json({ status: "success" });
+      res.status(201).json({ status: "success", result: [{}] });
     } catch (err) {
       console.log(err);
       const error = new HttpError(Errors.Something_Went_Wrong, req.language);
@@ -209,7 +221,7 @@ class authControllers {
     try {
       let { user_id } = req.userData;
       await redisController.delete("verify_codes", user_id);
-      res.status(201).json({ status: "success" });
+      res.status(201).json({ status: "success", result: [{}] });
     } catch (err) {
       console.log(err);
       const error = new HttpError(Errors.Something_Went_Wrong, req.language);
@@ -243,8 +255,12 @@ class authControllers {
       //TODO : کد اعتبار سنجی از نتیجه حذف شود
       res.status(201).json({
         status: "success",
-        username,
-        verify_code: verifiyCode,
+        result: [
+          {
+            username,
+            verify_code: verifiyCode,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);
@@ -289,8 +305,12 @@ class authControllers {
       );
       res.status(201).json({
         status: "success",
-        user_id: existingUser._id,
-        reset_token,
+        result: [
+          {
+            user_id: existingUser._id,
+            reset_token,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);
@@ -340,8 +360,12 @@ class authControllers {
       await redisController.hset("verify_codes", existingUser._id, token);
       res.status(201).json({
         status: "success",
-        user_id: existingUser._id,
-        token,
+        result: [
+          {
+            user_id: existingUser._id,
+            token,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);
@@ -357,7 +381,7 @@ class authControllers {
       let isValidPassword = false;
       let existingUser;
       try {
-         existingUser = await userController.getUserById(user_id);
+        existingUser = await userController.getUserById(user_id);
         if (!existingUser) {
           const error = new HttpError(Errors.User_Undefinded, req.language);
           return next(error);
@@ -377,7 +401,11 @@ class authControllers {
       await redisController.delete("verify_codes", existingUser._id);
       res.status(201).json({
         status: "success",
-        user_id: existingUser._id
+        result: [
+          {
+            user_id: existingUser._id,
+          },
+        ],
       });
     } catch (err) {
       console.log(err);

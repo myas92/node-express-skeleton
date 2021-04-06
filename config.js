@@ -23,4 +23,5 @@ module.exports = {
   DOMAIN: process.env.DOMAIN || "",
   REDIS_HOST_PUB_SUB: process.env.REDIS_HOST_PUB_SUB || "",
   REDIS_DB_PUB_SUB: process.env.REDIS_DB_PUB_SUB || "",
+  PHONE_SYSADMIN: process.env.PHONE_SYSADMIN ,
 };

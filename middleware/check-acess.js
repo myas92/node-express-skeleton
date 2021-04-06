@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     if (identifiedPath) {
       // جستجو در رول ها
       UserRoles.forEach((userRole) => {
-        if (identifiedPath.roles.includes(userRole)) {
+        if (identifiedPath.roles[0].includes(userRole)) {
           isValid = true;
         }
       });

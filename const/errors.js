@@ -165,3 +165,27 @@ exports.Access_Denied = {
     EN: "could not access to this api",
   },
 };
+exports.Item_Is_Not_Founded = {
+  statusCode: 200,
+  code: 1017,
+  message: {
+    FA: "مورد مورد نظر یافت نشد",
+    EN: "Item Is Not Founded",
+  },
+};
+exports.Transaction_Query_Faild = {
+  statusCode: 403,
+  code: 1018,
+  message: {
+    FA: "خطا در کوئری مورد نظر",
+    EN: "Transaction Query Faild",
+  },
+};
+exports.API_Is_Not_Implemented = {
+  statusCode: 403,
+  code: 1019,
+  message: {
+    FA: "درخواست مورد نظر پیاده سازی نشده است",
+    EN: "The API has not been implemented",
+  },
+};

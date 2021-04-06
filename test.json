@@ -1,0 +1,80 @@
+{
+  "_id": { "$oid": "5fea6e09" },
+  "isActiveTutor": false,
+  "youtubeUrlId": "",
+  "name": "rrrr",
+  "surname": "rrrrr",
+  "email": "u@gmail.com",
+  "initials": "",
+  "role": "tutor",
+  "createdAt": { "$date": "" },
+  "updatedAt": { "$date": { "$numberLong": "" } },
+  "messages": [
+    {
+      "contentInfo": {
+        "viewed": false,
+        "msg": "student message 1",
+        "createdAt": { "$date": "" }
+      },
+      "_id": { "$oid": "" },
+      "sender": { "$oid": "600333" }
+    },
+    {
+      "contentInfo": {
+        "viewed": false,
+        "msg": "heloooo",
+        "createdAt": { "$date": { "$numberLong": "" } }
+      },
+      "_id": { "$oid": "" },
+      "sender": { "$oid": "600333" }
+    },
+    {
+      "contentInfo": {
+        "viewed": false,
+        "msg": "dfdfdf",
+        "createdAt": { "$date": { "$numberLong": "" } }
+      },
+      "_id": { "$oid": "" },
+      "sender": { "$oid": "5fea6e09" }
+    }
+  ]
+}
+
+{
+    "_id": { "$oid": "600333" },
+    "name": "MMMMMM",
+    "surname": "xxxxx",
+    "email": "mar@gmail.com",
+    "role": "student",
+    "messages": [
+      {
+        "contentInfo": {
+          "viewed": false,
+          "msg": "22222222ghjk",
+          "createdAt": { "$date": { "$numberLong": "" } }
+        },
+        "_id": { "$oid": "" },
+        "receiver": { "$oid": "5fea6e09" }
+      },
+      {
+        "contentInfo": {
+          "viewed": false,
+          "msg": "heloooo",
+          "createdAt": { "$date": { "$numberLong": "" } }
+        },
+        "_id": { "$oid": "" },
+        "receiver": { "$oid": "5fea6e09" }
+      },
+      {
+        "contentInfo": {
+          "viewed": false,
+          "msg": "dfdfdf",
+          "createdAt": { "$date": { "$numberLong": "" } }
+        },
+        "_id": { "$oid": "" },
+        "receiver": { "$oid": "600333" }
+      }
+    ]
+  }
+  
+

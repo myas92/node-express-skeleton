@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate");
+const config = require("../../../config");
 const userSchema = new mongoose.Schema(
   {
     display_name: { type: String, required: true },
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema(
 userSchema.plugin(mongoosePaginate);
 
 userSchema.pre("save", async function (next) {
-  this.roles = ["visitor"];
+  this.roles = config.PHONE_SYSADMIN == this.phone ? ["sys_admin"] : ["visitor"];
   this.is_active = true;
   this.is_deleted = false;
   this.posts_edited = "0";
